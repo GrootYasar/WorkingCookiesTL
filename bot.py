@@ -8,6 +8,7 @@ from config import TELEGRAM_TOKEN, CHANNEL_ID, BOT_OWNER_ID, PASTEBIN_API_KEY, U
 from db import init_db, can_claim_cookie, can_generate_giftcode, is_valid_giftcode, get_random_cookie_file, redeem_giftcode, add_bulk_cookies, add_giftcode, add_user, get_all_users
 from utils import generate_gift_code, create_pastebin_entry, shorten_url
 
+logging.basicConfig(level=logging.DEBUG)  # Set the logging level to DEBUG
 logger = logging.getLogger(__name__)
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
@@ -43,8 +44,10 @@ def handle_generate_gift_code(message):
                 bot.send_message(message.chat.id, f"Here is your gift code URL: {shortened_url}")
             else:
                 bot.send_message(message.chat.id, "Failed to shorten URL. Please try again.")
+                logger.error("Failed to shorten URL")
         else:
             bot.send_message(message.chat.id, "Failed to create Pastebin entry. Please try again.")
+            logger.error("Failed to create Pastebin entry")
     else:
         bot.send_message(message.chat.id, "You can only generate a gift code every 6 hours. Please try again later.")
 
@@ -147,4 +150,5 @@ def is_member(user_id):
 
 if __name__ == '__main__':
     init_db()
+    bot.remove_webhook()  # Remove webhook if set
     bot.polling(none_stop=True)
